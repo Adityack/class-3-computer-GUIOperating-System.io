@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GUI Operating System - An Introduction</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Baloo+2:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .baloo {
+            font-family: 'Baloo 2', cursive;
+        }
+        .content-card {
+            background-color: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 3rem;
+        }
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-primary {
+            background-color: #4f46e5;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #4338ca;
+        }
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #1e293b;
+        }
+        .btn-secondary:hover {
+            background-color: #cbd5e1;
+        }
+        .desktop-bg {
+            background-image: url('https://placehold.co/1200x800/a5f3fc/0c4a6e?text=My+Desktop');
+            background-size: cover;
+            background-position: center;
+            border: 8px solid #334155;
+            border-radius: 1rem;
+            height: 60vh;
+            position: relative;
+            overflow: hidden;
+        }
+        .desktop-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            color: white;
+            text-shadow: 1px 1px 2px black;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            position: absolute;
+            width: 90px;
+        }
+        .desktop-icon:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .desktop-icon img {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 0.25rem;
+        }
+        .context-menu {
+            position: absolute;
+            background-color: #f1f5f9;
+            border: 1px solid #94a3b8;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 0.5rem 0;
+            z-index: 100;
+            display: none;
+        }
+        .context-menu-item {
+            padding: 0.5rem 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .context-menu-item:hover {
+            background-color: #4f46e5;
+            color: white;
+        }
+        .submenu {
+            position: absolute;
+            left: 100%;
+            top: 0;
+            display: none;
+            background-color: #f1f5f9;
+            border: 1px solid #94a3b8;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 0.5rem 0;
+            white-space: nowrap;
+        }
+        .context-menu-item:hover .submenu {
+            display: block;
+        }
+        .taskbar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background-color: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+            color: white;
+        }
+        .screen-saver {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: black;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            z-index: 200;
+            overflow: hidden;
+        }
+        .bubble {
+            position: absolute;
+            background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.1) 70%);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(100vh) scale(1); }
+            100% { transform: translateY(-10vh) scale(1.2); }
+        }
+        .quiz-option.correct {
+            background-color: #22c55e !important;
+            color: white !important;
+            border-color: #16a34a !important;
+        }
+        .quiz-option.incorrect {
+            background-color: #ef4444 !important;
+            color: white !important;
+            border-color: #dc2626 !important;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #explanation {
+            background-color: #eef2ff;
+            border-left: 4px solid #4f46e5;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0.5rem;
+        }
+        .function-card {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        .function-card:hover {
+            border-color: #4f46e5;
+            transform: scale(1.05);
+        }
+        .cli-gui-container {
+            background: #f1f5f9;
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+        .terminal {
+            background: #1e293b;
+            color: #94a3b8;
+            font-family: monospace;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            height: 150px;
+        }
+        .boot-screen {
+            background: #020617;
+            color: #e2e8f0;
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+        }
+        .boot-item {
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .boot-item.loaded {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-12">
+            <h1 class="text-5xl md:text-6xl font-bold text-slate-900 baloo">Welcome, Future Tech Whiz!</h1>
+            <p class="text-xl text-slate-600 mt-2">Let's learn about the GUI Operating System!</p>
+        </header>
+
+        <!-- Introduction Section -->
+        <section id="intro" class="content-card">
+            <div class="flex flex-col md:flex-row items-center gap-8">
+                <div class="md:w-1/2">
+                    <h2 class="text-4xl font-bold text-indigo-600 mb-4 baloo">What's an Operating System?</h2>
+                    <p class="mb-4 text-lg">Think of an Operating System (OS) like a school principal. The principal manages everything in the school - teachers, classes, and even the school bus!</p>
+                    <p class="text-lg">Similarly, an OS is the boss of the computer. It manages all the computer's parts (hardware) and programs (software) so everything works together smoothly. When you turn on your computer, the OS is the first thing that wakes up!</p>
+                </div>
+                <div class="md:w-1/2 flex justify-center items-center">
+                    <div class="relative w-64 h-64">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <img src="https://placehold.co/150x150/e0e7ff/4338ca?text=OS" alt="Operating System" class="rounded-full z-10 shadow-lg">
+                        </div>
+                        <div class="absolute w-20 h-20 top-0 left-0 animate-pulse"><img src="https://placehold.co/60x60/fecaca/991b1b?text=App" alt="App" class="rounded-lg shadow-md"></div>
+                        <div class="absolute w-20 h-20 top-0 right-0 animate-pulse" style="animation-delay: 0.5s;"><img src="https://placehold.co/60x60/bbf7d0/166534?text=File" alt="File" class="rounded-lg shadow-md"></div>
+                        <div class="absolute w-20 h-20 bottom-0 left-0 animate-pulse" style="animation-delay: 1s;"><img src="https://placehold.co/60x60/fed7aa/9a3412?text=Mouse" alt="Mouse" class="rounded-lg shadow-md"></div>
+                        <div class="absolute w-20 h-20 bottom-0 right-0 animate-pulse" style="animation-delay: 1.5s;"><img src="https://placehold.co/60x60/bfdbfe/1e40af?text=Printer" alt="Printer" class="rounded-lg shadow-md"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- NEW: Functions of an OS Section -->
+        <section id="functions" class="content-card">
+            <h2 class="text-4xl font-bold text-center text-indigo-600 mb-8 baloo">The OS's Super Powers!</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="function-card">
+                    <img src="https://img.icons8.com/fluency/96/processor.png" class="mx-auto mb-4 h-20 w-20" alt="Hardware/Software"/>
+                    <h3 class="text-xl font-bold mb-2">Manages Hardware & Software</h3>
+                    <p>The OS controls all parts of the computer, from the mouse to the printer, and all the apps.</p>
+                </div>
+                <div class="function-card">
+                    <img src="https://img.icons8.com/fluency/96/task.png" class="mx-auto mb-4 h-20 w-20" alt="Tasks"/>
+                    <h3 class="text-xl font-bold mb-2">Assigns Tasks</h3>
+                    <p>It acts like a traffic cop, making sure different programs take turns using the computer's brain (CPU).</p>
+                </div>
+                <div class="function-card">
+                    <img src="https://img.icons8.com/fluency/96/command-line.png" class="mx-auto mb-4 h-20 w-20" alt="Commands"/>
+                    <h3 class="text-xl font-bold mb-2">Interprets Commands</h3>
+                    <p>It understands your clicks and keystrokes, turning them into actions the computer can perform.</p>
+                </div>
+                <div class="function-card">
+                    <img src="https://img.icons8.com/fluency/96/error.png" class="mx-auto mb-4 h-20 w-20" alt="Errors"/>
+                    <h3 class="text-xl font-bold mb-2">Detects Errors</h3>
+                    <p>If something goes wrong, the OS will often show an error message to let you know what the problem is.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- NEW: CLI vs GUI Section -->
+        <section id="cli-vs-gui" class="content-card">
+            <h2 class="text-4xl font-bold text-center text-indigo-600 mb-8 baloo">Two Ways to Talk to a Computer</h2>
+            <div class="grid md:grid-cols-2 gap-8 items-start">
+                <div class="cli-gui-container">
+                    <h3 class="text-2xl font-bold mb-4 text-center">CLI (Command Line Interface)</h3>
+                    <p class="text-center mb-4">You have to type commands to tell the computer what to do. It's powerful but you need to memorize the commands!</p>
+                    <div class="terminal" id="terminal-output"></div>
+                    <button id="run-cli-btn" class="btn btn-primary w-full mt-4">Run Command</button>
+                </div>
+                <div class="cli-gui-container">
+                    <h3 class="text-2xl font-bold mb-4 text-center">GUI (Graphical User Interface)</h3>
+                    <p class="text-center mb-4">You can click on icons and buttons to get things done. It's visual and easy to learn!</p>
+                    <div class="bg-blue-100 p-4 rounded-lg h-[150px] flex items-center justify-center">
+                        <div id="gui-folder" class="text-center cursor-pointer">
+                            <img src="https://img.icons8.com/fluency/96/folder-invoices.png" class="mx-auto h-20 w-20" alt="Folder"/>
+                            <span>My Documents</span>
+                        </div>
+                        <div id="gui-files" class="hidden text-left">
+                            <p>📄 Report.docx</p>
+                            <p>🖼️ Vacation.jpg</p>
+                            <p>🎵 Music.mp3</p>
+                        </div>
+                    </div>
+                    <p class="text-center mt-4">Click the folder!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- NEW: Single vs Multi-user Section -->
+        <section id="user-types" class="content-card">
+             <h2 class="text-4xl font-bold text-center text-indigo-600 mb-8 baloo">One User or Many?</h2>
+             <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="text-center">
+                    <h3 class="text-2xl font-bold mb-4">Single-User OS</h3>
+                    <img src="https://placehold.co/400x200/e0e7ff/4338ca?text=One+Person+%E2%86%92+One+PC" class="rounded-lg mx-auto shadow-lg" alt="Single User"/>
+                    <p class="mt-4">Designed for one person to use at a time. Most home computers (like Windows 10) are single-user.</p>
+                </div>
+                <div class="text-center">
+                    <h3 class="text-2xl font-bold mb-4">Multi-User OS</h3>
+                    <img src="https://placehold.co/400x200/dcfce7/14532d?text=Many+People+%E2%86%92+One+Server" class="rounded-lg mx-auto shadow-lg" alt="Multi User"/>
+                    <p class="mt-4">Allows many people to use the same computer at the same time, usually by connecting to a powerful server. (e.g., UNIX, Linux).</p>
+                </div>
+             </div>
+        </section>
+
+        <!-- NEW: Power Modes Section -->
+        <section id="power-modes" class="content-card">
+             <h2 class="text-4xl font-bold text-center text-indigo-600 mb-8 baloo">Power Up! Normal vs. Safe Mode</h2>
+             <div class="boot-screen" id="boot-screen">
+                <p id="boot-message">Choose a mode to start the computer.</p>
+                <div id="boot-items-container" class="mt-4 grid grid-cols-2 gap-4"></div>
+             </div>
+             <div class="flex justify-center gap-4 mt-6">
+                <button id="boot-normal-btn" class="btn btn-primary">Start in Normal Mode</button>
+                <button id="boot-safe-btn" class="btn btn-secondary">Start in Safe Mode</button>
+             </div>
+        </section>
+
+        <!-- Desktop Simulation -->
+        <section id="desktop-sim" class="content-card">
+            <h2 class="text-4xl font-bold text-center text-indigo-600 mb-6 baloo">Explore the Desktop!</h2>
+            <p class="text-center text-lg mb-6">This is a simulation of a computer desktop. Try right-clicking on the background!</p>
+            <div id="desktop" class="desktop-bg relative">
+                <div id="icon-pc" class="desktop-icon" style="top: 20px; left: 20px;"><img src="https://img.icons8.com/fluency/96/000000/computer.png" alt="This PC"/><span>This PC</span></div>
+                <div id="icon-recycle" class="desktop-icon" style="top: 120px; left: 20px;"><img src="https://img.icons8.com/fluency/96/000000/recycle-bin.png" alt="Recycle Bin"/><span>Recycle Bin</span></div>
+                <div id="icon-folder" class="desktop-icon" style="top: 220px; left: 20px;"><img src="https://img.icons8.com/fluency/96/000000/folder-invoices.png" alt="Folder"/><span>My Files</span></div>
+                <div id="icon-paint" class="desktop-icon" style="top: 320px; left: 20px;"><img src="https://img.icons8.com/fluency/96/000000/paint-palette.png" alt="Paint"/><span>Paint</span></div>
+                <div id="context-menu" class="context-menu">
+                    <div class="context-menu-item" id="view-menu-item"><span>View</span><span>▶</span><div class="submenu"><div class="context-menu-item" id="view-large">Large icons</div><div class="context-menu-item" id="view-medium">Medium icons</div><div class="context-menu-item" id="view-small">Small icons</div><hr class="my-1 border-slate-300"><div class="context-menu-item" id="toggle-icons">Hide desktop icons</div></div></div>
+                    <div class="context-menu-item" id="sort-menu-item"><span>Sort by</span><span>▶</span><div class="submenu"><div class="context-menu-item" id="sort-name">Name</div><div class="context-menu-item" id="sort-position">Original Position</div></div></div>
+                    <hr class="my-1 border-slate-300">
+                    <div class="context-menu-item" id="change-wallpaper">Change Wallpaper</div><div class="context-menu-item" id="start-screensaver">Start Screen Saver</div>
+                </div>
+                <div class="taskbar"><div class="font-bold">Start</div><div class="ml-auto" id="clock"></div></div>
+                <div id="screen-saver" class="screen-saver"><p>My Awesome Screen Saver!</p></div>
+                <div id="message-box" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-lg shadow-2xl text-center hidden z-50"><h3 id="message-title" class="text-2xl font-bold mb-4"></h3><p id="message-text" class="mb-6"></p><button id="message-ok" class="btn btn-primary">OK</button></div>
+            </div>
+        </section>
+        
+        <!-- NEW: Shut Down Section -->
+        <section id="shutdown" class="content-card">
+            <h2 class="text-4xl font-bold text-center text-indigo-600 mb-8 baloo">Time to Say Goodbye</h2>
+            <p class="text-center mb-6">It's important to shut down your computer properly to keep it healthy. Follow the steps below!</p>
+            <div class="flex justify-center items-center bg-slate-200 p-8 rounded-lg">
+                <div id="shutdown-sim" class="flex items-center gap-4">
+                     <button id="start-btn-sim" class="btn btn-primary">Start</button>
+                     <div id="power-menu-sim" class="hidden flex gap-2 bg-white p-2 rounded-lg shadow-lg">
+                        <button id="shutdown-btn-sim" class="btn btn-secondary">Shut Down</button>
+                     </div>
+                </div>
+                <div id="shutdown-screen-sim" class="hidden text-2xl font-bold">
+                    Shutting down...
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz Section -->
+        <section id="quiz" class="content-card">
+            <h2 class="text-4xl font-bold text-center text-indigo-600 mb-6 baloo">Knowledge Check!</h2>
+            <div id="quiz-container" class="max-w-2xl mx-auto"></div>
+            <div class="text-center mt-6"><button id="next-question-btn" class="btn btn-primary hidden">Next Question</button></div>
+            <div id="quiz-result" class="text-center text-2xl font-bold mt-6 hidden"></div>
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Clock ---
+            const clockElement = document.getElementById('clock');
+            function updateClock() {
+                const now = new Date();
+                const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                clockElement.textContent = time;
+            }
+            setInterval(updateClock, 1000);
+            updateClock();
+
+            // --- Message Box ---
+            const messageBox = document.getElementById('message-box');
+            const messageTitle = document.getElementById('message-title');
+            const messageText = document.getElementById('message-text');
+            const messageOk = document.getElementById('message-ok');
+            function showMessage(title, text) {
+                messageTitle.textContent = title;
+                messageText.textContent = text;
+                messageBox.classList.remove('hidden');
+                messageBox.classList.add('fade-in');
+            }
+            messageOk.addEventListener('click', () => { messageBox.classList.add('hidden'); });
+            
+            // --- NEW INTERACTIVE SECTIONS ---
+            
+            // CLI vs GUI
+            const runCliBtn = document.getElementById('run-cli-btn');
+            const terminalOutput = document.getElementById('terminal-output');
+            runCliBtn.addEventListener('click', () => {
+                terminalOutput.innerHTML = '';
+                const command = '> C:/Users/Student> list_files';
+                let i = 0;
+                const typeWriter = () => {
+                    if (i < command.length) {
+                        terminalOutput.innerHTML += command.charAt(i);
+                        i++;
+                        setTimeout(typeWriter, 50);
+                    } else {
+                        terminalOutput.innerHTML += '<br>📄 Report.docx<br>🖼️ Vacation.jpg<br>🎵 Music.mp3';
+                    }
+                };
+                typeWriter();
+            });
+
+            const guiFolder = document.getElementById('gui-folder');
+            const guiFiles = document.getElementById('gui-files');
+            guiFolder.addEventListener('click', () => {
+                guiFolder.classList.add('hidden');
+                guiFiles.classList.remove('hidden');
+            });
+            
+            // Power Modes
+            const bootScreen = document.getElementById('boot-screen');
+            const bootMessage = document.getElementById('boot-message');
+            const bootItemsContainer = document.getElementById('boot-items-container');
+            const bootNormalBtn = document.getElementById('boot-normal-btn');
+            const bootSafeBtn = document.getElementById('boot-safe-btn');
+            
+            const bootItems = {
+                '✅ Keyboard': true,
+                '✅ Mouse': true,
+                '✅ Graphics Card': true,
+                '✅ Sound Card': true,
+                '✅ Network': true
+            };
+
+            bootNormalBtn.addEventListener('click', () => runBootSequence(true));
+            bootSafeBtn.addEventListener('click', () => runBootSequence(false));
+
+            function runBootSequence(isNormal) {
+                bootMessage.textContent = isNormal ? 'Starting in Normal Mode...' : 'Starting in Safe Mode...';
+                bootItemsContainer.innerHTML = '';
+                let delay = 0;
+                for (const [item, enabled] of Object.entries(bootItems)) {
+                    const isLoaded = isNormal || (item.includes('Keyboard') || item.includes('Mouse'));
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'boot-item';
+                    itemEl.textContent = isLoaded ? item : `❌ ${item.substring(2)} (disabled)`;
+                    bootItemsContainer.appendChild(itemEl);
+                    
+                    setTimeout(() => {
+                        itemEl.classList.add('loaded');
+                    }, delay);
+                    delay += 300;
+                }
+                setTimeout(() => {
+                    bootMessage.textContent = isNormal ? 'System Ready!' : 'Safe Mode: System running with limited drivers.';
+                }, delay);
+            }
+
+            // Shutdown Sim
+            const startBtnSim = document.getElementById('start-btn-sim');
+            const powerMenuSim = document.getElementById('power-menu-sim');
+            const shutdownBtnSim = document.getElementById('shutdown-btn-sim');
+            const shutdownSim = document.getElementById('shutdown-sim');
+            const shutdownScreenSim = document.getElementById('shutdown-screen-sim');
+
+            startBtnSim.addEventListener('click', (e) => {
+                e.stopPropagation();
+                powerMenuSim.classList.toggle('hidden');
+            });
+            shutdownBtnSim.addEventListener('click', () => {
+                shutdownSim.classList.add('hidden');
+                shutdownScreenSim.classList.remove('hidden');
+                setTimeout(() => {
+                    shutdownSim.classList.remove('hidden');
+                    shutdownScreenSim.classList.add('hidden');
+                    powerMenuSim.classList.add('hidden');
+                }, 3000);
+            });
+            document.body.addEventListener('click', () => powerMenuSim.classList.add('hidden'));
+
+
+            // --- DESKTOP SIMULATION ---
+            const desktop = document.getElementById('desktop');
+            const contextMenu = document.getElementById('context-menu');
+            const icons = Array.from(document.querySelectorAll('.desktop-icon'));
+            const initialIconPositions = icons.map(icon => ({ top: icon.style.top, left: icon.style.left }));
+
+            desktop.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                contextMenu.style.display = 'block';
+                contextMenu.style.left = `${e.clientX - desktop.getBoundingClientRect().left}px`;
+                contextMenu.style.top = `${e.clientY - desktop.getBoundingClientRect().top}px`;
+            });
+
+            document.addEventListener('click', () => { contextMenu.style.display = 'none'; });
+
+            icons.forEach(icon => {
+                icon.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const iconId = icon.id;
+                    if (iconId === 'icon-pc') showMessage('This PC', 'This shows you all the drives, files, and folders on your computer.');
+                    else if (iconId === 'icon-recycle') showMessage('Recycle Bin', 'When you delete files, they go here. You can restore them or empty the bin to permanently delete them.');
+                    else if (iconId === 'icon-folder') showMessage('My Files', 'Folders help you organize your files, just like folders in a filing cabinet!');
+                    else if (iconId === 'icon-paint') showMessage('Paint Program', 'An application you can use to draw and create pictures!');
+                });
+            });
+
+            document.getElementById('view-large').addEventListener('click', () => setIconSize(70, 'Large'));
+            document.getElementById('view-medium').addEventListener('click', () => setIconSize(50, 'Medium'));
+            document.getElementById('view-small').addEventListener('click', () => setIconSize(30, 'Small'));
+            
+            let iconsVisible = true;
+            const toggleIconsBtn = document.getElementById('toggle-icons');
+            toggleIconsBtn.addEventListener('click', () => {
+                iconsVisible = !iconsVisible;
+                icons.forEach(icon => icon.style.display = iconsVisible ? 'flex' : 'none');
+                toggleIconsBtn.textContent = iconsVisible ? 'Hide desktop icons' : 'Show desktop icons';
+            });
+
+            function setIconSize(size, label) {
+                icons.forEach(icon => { icon.querySelector('img').style.width = `${size}px`; icon.querySelector('img').style.height = `${size}px`; });
+                showMessage('Icon Size Changed', `Icons are now set to ${label} size.`);
+            }
+
+            document.getElementById('sort-name').addEventListener('click', () => {
+                const sortedIcons = [...icons].sort((a, b) => a.querySelector('span').textContent.localeCompare(b.querySelector('span').textContent));
+                rearrangeIcons(sortedIcons);
+                showMessage('Icons Sorted', 'The icons have been arranged by name.');
+            });
+             document.getElementById('sort-position').addEventListener('click', () => {
+                icons.forEach((icon, index) => { icon.style.transition = 'top 0.5s ease, left 0.5s ease'; icon.style.top = initialIconPositions[index].top; icon.style.left = initialIconPositions[index].left; });
+                showMessage('Icons Reset', 'The icons are back in their original places.');
+            });
+
+            function rearrangeIcons(sortedIcons) {
+                const padding = 20; const iconHeight = 100;
+                sortedIcons.forEach((icon, index) => { icon.style.transition = 'top 0.5s ease, left 0.5s ease'; icon.style.top = `${padding + (index * iconHeight)}px`; icon.style.left = `${padding}px`; });
+            }
+
+            const wallpapers = ['https://placehold.co/1200x800/a5f3fc/0c4a6e?text=My+Desktop', 'https://placehold.co/1200x800/fecdd3/881337?text=Fun+Times', 'https://placehold.co/1200x800/dcfce7/14532d?text=Nature', 'https://placehold.co/1200x800/e0e7ff/312e81?text=Space'];
+            let currentWallpaper = 0;
+            document.getElementById('change-wallpaper').addEventListener('click', () => { currentWallpaper = (currentWallpaper + 1) % wallpapers.length; desktop.style.backgroundImage = `url('${wallpapers[currentWallpaper]}')`; });
+            
+            const screenSaver = document.getElementById('screen-saver');
+            document.getElementById('start-screensaver').addEventListener('click', () => {
+                screenSaver.style.display = 'flex'; createBubbles();
+                setTimeout(() => { screenSaver.style.display = 'none'; screenSaver.innerHTML = '<p>My Awesome Screen Saver!</p>'; }, 5000);
+            });
+            
+            function createBubbles() {
+                for(let i = 0; i < 15; i++) {
+                    const bubble = document.createElement('div'); bubble.className = 'bubble'; const size = Math.random() * 100 + 20;
+                    bubble.style.width = `${size}px`; bubble.style.height = `${size}px`; bubble.style.left = `${Math.random() * 100}%`;
+                    bubble.style.animationDuration = `${Math.random() * 10 + 10}s`; bubble.style.animationDelay = `${Math.random() * 5}s`;
+                    screenSaver.appendChild(bubble);
+                }
+            }
+
+            // --- QUIZ LOGIC ---
+            const quizContainer = document.getElementById('quiz-container');
+            const quizResult = document.getElementById('quiz-result');
+            const nextButton = document.getElementById('next-question-btn');
+            const questionBank = [
+                { question: "What is the primary role of an Operating System?", options: ["To play games", "To manage hardware and software", "To browse the internet", "To create documents"], answer: "To manage hardware and software", explanation: "The Operating System (OS) is the main software that manages all the hardware and other software on a computer, like a principal managing a school." },
+                { question: "Which of these is a key function of an operating system?", options: ["Making the computer look pretty", "Detecting errors in the system", "Increasing internet speed", "Charging the battery"], answer: "Detecting errors in the system", explanation: "A good OS constantly checks for problems (errors) and tries to fix them or alert the user, ensuring the computer runs smoothly." },
+                { question: "What does GUI stand for?", options: ["Graphical User Interaction", "Great User Interface", "Graphical User Interface", "Gaming User Input"], answer: "Graphical User Interface", explanation: "GUI stands for Graphical User Interface. It means you can interact with the computer using visual elements like icons and menus instead of just text." },
+                { question: "How do you give commands in a Command Line Interface (CLI)?", options: ["By clicking on pictures", "By talking to the computer", "By typing text commands", "By using a remote control"], answer: "By typing text commands", explanation: "In a CLI, like old MS-DOS, you have to type specific commands to get the computer to do anything. You have to remember the commands!" },
+                { question: "What defines a single-user operating system?", options: ["It can only run one program at a time", "It supports only one user at a time", "It can only be used by one person ever", "It has a single-core processor"], answer: "It supports only one user at a time", explanation: "A single-user OS, like the Windows on most home PCs, is designed for one person to be logged in and working at a time." },
+                { question: "In a multi-user system, what is the powerful central computer called?", options: ["The Boss", "The Mainframe", "The Server", "The Client"], answer: "The Server", explanation: "A server is a powerful computer that provides services (like files or applications) to many other computers (called clients) at once." },
+                { question: "What is the first screen you see after the operating system loads?", options: ["The Start Menu", "The Internet", "The Desktop", "The Lock Screen"], answer: "The Desktop", explanation: "The Desktop is your main workspace. It's the screen that appears with your wallpaper and icons after you log in." },
+                { question: "Where do deleted files and folders go temporarily?", options: ["Into thin air", "The Recycle Bin", "A backup drive", "A secret folder"], answer: "The Recycle Bin", explanation: "The Recycle Bin is a safety net. When you delete something, it goes there first, allowing you to restore it if you made a mistake." },
+                { question: "How do you open the menu to arrange or view icons?", options: ["Double-click the background", "Left-click the background", "Right-click a blank area of the desktop", "Press the Enter key"], answer: "Right-click a blank area of the desktop", explanation: "Right-clicking on the desktop opens a special context menu with options like 'View' and 'Sort by' to manage your icons." },
+                { question: "What is the background image of the desktop called?", options: ["Desktop Picture", "Wallpaper", "Screen Cover", "Digital Poster"], answer: "Wallpaper", explanation: "The decorative image behind your icons is called the Wallpaper or desktop background. You can change it to any picture you like!" },
+                { question: "What is a Screen Saver?", options: ["A program that cleans the screen", "A moving picture that appears when the computer is idle", "A special type of wallpaper", "A security program"], answer: "A moving picture that appears when the computer is idle", explanation: "A screen saver is an animation or image that appears when you haven't used your computer for a while. It was originally to prevent images from 'burning in' to old monitors." },
+                { question: "What is the correct way to turn off a computer?", options: ["Press the power button on the monitor", "Just unplug it from the wall", "Use the 'Shut down' command from the Start menu", "Close the lid of the laptop"], answer: "Use the 'Shut down' command from the Start menu", explanation: "Properly shutting down allows the OS to close all programs and save files correctly. Just cutting the power can cause problems." },
+                { question: "In which power mode does the computer start with limited functions to fix problems?", options: ["Normal Mode", "Sleep Mode", "Safe Mode", "Hibernate Mode"], answer: "Safe Mode", explanation: "Safe Mode is a diagnostic mode. It loads only the essential parts of the OS, which can help you troubleshoot and fix problems that prevent Windows from starting normally." }
+            ];
+            let currentQuestions = []; let currentQuestionIndex = 0; let score = 0; const questionsPerQuiz = 5;
+            function shuffle(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } return array; }
+            function startQuiz() { currentQuestions = shuffle([...questionBank]).slice(0, questionsPerQuiz); currentQuestionIndex = 0; score = 0; quizResult.classList.add('hidden'); nextButton.classList.add('hidden'); loadQuestion(); }
+            function loadQuestion() {
+                quizContainer.innerHTML = '';
+                if (currentQuestionIndex < currentQuestions.length) {
+                    const q = currentQuestions[currentQuestionIndex];
+                    const questionEl = document.createElement('div'); questionEl.className = 'fade-in';
+                    questionEl.innerHTML = `<p class="text-xl font-semibold mb-4">${currentQuestionIndex + 1}. ${q.question}</p><div class="grid grid-cols-1 md:grid-cols-2 gap-4">${q.options.map(opt => `<button class="quiz-option btn btn-secondary text-left w-full">${opt}</button>`).join('')}</div><div id="explanation" class="hidden mt-4"></div>`;
+                    quizContainer.appendChild(questionEl);
+                    quizContainer.querySelectorAll('.quiz-option').forEach(option => { option.addEventListener('click', handleOptionClick); });
+                } else { showResult(); }
+            }
+            function handleOptionClick(e) {
+                const selectedButton = e.target; const q = currentQuestions[currentQuestionIndex]; const selectedAnswer = selectedButton.textContent;
+                const options = quizContainer.querySelectorAll('.quiz-option');
+                options.forEach(opt => { opt.removeEventListener('click', handleOptionClick); opt.disabled = true; });
+                if (selectedAnswer === q.answer) { selectedButton.classList.add('correct'); score++; } else { selectedButton.classList.add('incorrect'); options.forEach(opt => { if (opt.textContent === q.answer) { opt.classList.add('correct'); } }); }
+                const explanationEl = document.getElementById('explanation');
+                explanationEl.innerHTML = `<p class="font-bold">Explanation:</p><p>${q.explanation}</p>`;
+                explanationEl.classList.remove('hidden'); explanationEl.classList.add('fade-in');
+                nextButton.classList.remove('hidden');
+            }
+            nextButton.addEventListener('click', () => { currentQuestionIndex++; nextButton.classList.add('hidden'); loadQuestion(); });
+            function showResult() {
+                quizContainer.innerHTML = ''; quizResult.classList.remove('hidden'); quizResult.classList.add('fade-in');
+                quizResult.innerHTML = `You scored ${score} out of ${questionsPerQuiz}! Great job! <br/> <button id="restart-quiz" class="btn btn-primary mt-4">Take Another Quiz</button>`;
+                document.getElementById('restart-quiz').addEventListener('click', startQuiz);
+            }
+            startQuiz();
+        });
+    </script>
+</body>
+</html>

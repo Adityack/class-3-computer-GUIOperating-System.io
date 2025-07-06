@@ -219,6 +219,20 @@
         .boot-item.loaded {
             opacity: 1;
         }
+        #quiz-timer {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4f46e5;
+            background-color: #eef2ff;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            border: 4px solid #4f46e5;
+        }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800">
@@ -226,7 +240,7 @@
     <div class="container mx-auto p-4 md:p-8">
         <header class="text-center mb-12">
             <h1 class="text-5xl md:text-6xl font-bold text-slate-900 baloo">Welcome, Future Tech Whiz!</h1>
-            <p class="text-xl text-slate-600 mt-2">Let's learn about the GUI Operating System!</p>
+            <p class="text-lg text-slate-500 mt-2">Made with ❤️ by Sourav Sir</p>
         </header>
 
         <!-- Introduction Section -->
@@ -378,7 +392,10 @@
         <!-- Quiz Section -->
         <section id="quiz" class="content-card">
             <h2 class="text-4xl font-bold text-center text-indigo-600 mb-6 baloo">Knowledge Check!</h2>
-            <div id="quiz-container" class="max-w-2xl mx-auto"></div>
+            <div id="quiz-container" class="max-w-2xl mx-auto">
+                <!-- Timer will be injected here -->
+                <!-- Question will be injected here -->
+            </div>
             <div class="text-center mt-6"><button id="next-question-btn" class="btn btn-primary hidden">Next Question</button></div>
             <div id="quiz-result" class="text-center text-2xl font-bold mt-6 hidden"></div>
         </section>
@@ -695,32 +712,123 @@
                 { question: "Can a screen saver be just a blank, black screen?", options: ["No, it must be animated", "Yes, 'Blank' is one of the default options", "Only if your monitor is off", "Only if the computer has an error"], answer: "Yes, 'Blank' is one of the default options", explanation: "Choosing the 'Blank' screen saver is a simple way to have the screen go black when idle, which is good for saving power on some monitors." }
             ];
 
-            let currentQuestions = []; let currentQuestionIndex = 0; let score = 0; const questionsPerQuiz = 10; // Increased questions per quiz
+            let currentQuestions = []; 
+            let currentQuestionIndex = 0; 
+            let score = 0; 
+            const questionsPerQuiz = 10;
+            let timerInterval;
+            let timeLeft = 20;
+
             function shuffle(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } return array; }
-            function startQuiz() { currentQuestions = shuffle([...questionBank]).slice(0, questionsPerQuiz); currentQuestionIndex = 0; score = 0; quizResult.classList.add('hidden'); nextButton.classList.add('hidden'); loadQuestion(); }
+            
+            function startQuiz() { 
+                currentQuestions = shuffle([...questionBank]).slice(0, questionsPerQuiz); 
+                currentQuestionIndex = 0; 
+                score = 0; 
+                quizResult.classList.add('hidden'); 
+                nextButton.classList.add('hidden'); 
+                loadQuestion(); 
+            }
+
             function loadQuestion() {
                 quizContainer.innerHTML = '';
                 if (currentQuestionIndex < currentQuestions.length) {
                     const q = currentQuestions[currentQuestionIndex];
-                    const questionEl = document.createElement('div'); questionEl.className = 'fade-in';
-                    questionEl.innerHTML = `<p class="text-xl font-semibold mb-4">${currentQuestionIndex + 1}. ${q.question}</p><div class="grid grid-cols-1 md:grid-cols-2 gap-4">${q.options.map(opt => `<button class="quiz-option btn btn-secondary text-left w-full">${opt}</button>`).join('')}</div><div id="explanation" class="hidden mt-4"></div>`;
+                    const questionEl = document.createElement('div'); 
+                    questionEl.className = 'fade-in';
+                    questionEl.innerHTML = `
+                        <div id="quiz-timer">${timeLeft}</div>
+                        <p class="text-xl font-semibold mb-4">${currentQuestionIndex + 1}. ${q.question}</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">${q.options.map(opt => `<button class="quiz-option btn btn-secondary text-left w-full">${opt}</button>`).join('')}</div>
+                        <div id="explanation" class="hidden mt-4"></div>
+                    `;
                     quizContainer.appendChild(questionEl);
                     quizContainer.querySelectorAll('.quiz-option').forEach(option => { option.addEventListener('click', handleOptionClick); });
-                } else { showResult(); }
+                    
+                    timeLeft = 20;
+                    updateTimerDisplay();
+                    timerInterval = setInterval(updateTimer, 1000);
+
+                } else { 
+                    showResult(); 
+                }
             }
-            function handleOptionClick(e) {
-                const selectedButton = e.target; const q = currentQuestions[currentQuestionIndex]; const selectedAnswer = selectedButton.textContent;
+
+            function updateTimer() {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleTimeUp();
+                }
+            }
+            
+            function updateTimerDisplay() {
+                const timerEl = document.getElementById('quiz-timer');
+                if (timerEl) {
+                    timerEl.textContent = timeLeft;
+                    if (timeLeft <= 5) {
+                        timerEl.style.color = '#ef4444';
+                        timerEl.style.borderColor = '#ef4444';
+                    } else {
+                        timerEl.style.color = '#4f46e5';
+                        timerEl.style.borderColor = '#4f46e5';
+                    }
+                }
+            }
+
+            function handleTimeUp() {
+                const q = currentQuestions[currentQuestionIndex];
                 const options = quizContainer.querySelectorAll('.quiz-option');
-                options.forEach(opt => { opt.removeEventListener('click', handleOptionClick); opt.disabled = true; });
-                if (selectedAnswer === q.answer) { selectedButton.classList.add('correct'); score++; } else { selectedButton.classList.add('incorrect'); options.forEach(opt => { if (opt.textContent === q.answer) { opt.classList.add('correct'); } }); }
+                
+                options.forEach(opt => {
+                    opt.disabled = true;
+                    if (opt.textContent === q.answer) {
+                        opt.classList.add('correct');
+                    }
+                });
+
                 const explanationEl = document.getElementById('explanation');
-                explanationEl.innerHTML = `<p class="font-bold">Explanation:</p><p>${q.explanation}</p>`;
-                explanationEl.classList.remove('hidden'); explanationEl.classList.add('fade-in');
+                explanationEl.innerHTML = `<p class="font-bold">Time's up!</p><p>${q.explanation}</p>`;
+                explanationEl.classList.remove('hidden');
+                explanationEl.classList.add('fade-in');
+                
                 nextButton.classList.remove('hidden');
             }
-            nextButton.addEventListener('click', () => { currentQuestionIndex++; nextButton.classList.add('hidden'); loadQuestion(); });
+
+            function handleOptionClick(e) {
+                clearInterval(timerInterval);
+                const selectedButton = e.target; 
+                const q = currentQuestions[currentQuestionIndex]; 
+                const selectedAnswer = selectedButton.textContent;
+                
+                const options = quizContainer.querySelectorAll('.quiz-option');
+                options.forEach(opt => { opt.removeEventListener('click', handleOptionClick); opt.disabled = true; });
+                
+                if (selectedAnswer === q.answer) { 
+                    selectedButton.classList.add('correct'); 
+                    score++; 
+                } else { 
+                    selectedButton.classList.add('incorrect'); 
+                    options.forEach(opt => { if (opt.textContent === q.answer) { opt.classList.add('correct'); } }); 
+                }
+                const explanationEl = document.getElementById('explanation');
+                explanationEl.innerHTML = `<p class="font-bold">Explanation:</p><p>${q.explanation}</p>`;
+                explanationEl.classList.remove('hidden'); 
+                explanationEl.classList.add('fade-in');
+                nextButton.classList.remove('hidden');
+            }
+
+            nextButton.addEventListener('click', () => { 
+                currentQuestionIndex++; 
+                nextButton.classList.add('hidden'); 
+                loadQuestion(); 
+            });
+
             function showResult() {
-                quizContainer.innerHTML = ''; quizResult.classList.remove('hidden'); quizResult.classList.add('fade-in');
+                quizContainer.innerHTML = ''; 
+                quizResult.classList.remove('hidden'); 
+                quizResult.classList.add('fade-in');
                 quizResult.innerHTML = `You scored ${score} out of ${questionsPerQuiz}! Great job! <br/> <button id="restart-quiz" class="btn btn-primary mt-4">Take Another Quiz</button>`;
                 document.getElementById('restart-quiz').addEventListener('click', startQuiz);
             }
